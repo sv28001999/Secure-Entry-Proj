@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Secure Entry</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <!--    <string name="google_api_key">AIzaSyCTUx0btVL8EYU_zMQZ6lhJLadUwhog0nA</string>-->
+    <string name="fill_your_details">Fill your details</string>
+    <string name="one_step_away_to_start_the_journey">One step away to start the journey!</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="full_name">Full Name</string>
+    <string name="e_g_tony_stark">e.g. Tony Stark</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="e_g_9876543210">e.g. 9876543210</string>
+    <string name="your_email">Your Email</string>
+    <string name="e_g_secure_entry_se_com">e.g. secure-entry@se.com</string>
+    <string name="profile">Profile</string>
+    <string name="add_image">Add Image</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

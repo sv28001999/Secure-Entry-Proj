@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".AddEventActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/voilet_700"
+        android:orientation="horizontal"
+        android:paddingStart="25dp"
+        android:paddingTop="25dp"
+        android:paddingBottom="20dp">
+
+        <ImageButton
+            android:id="@+id/addEventBackBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/round_shape_white_bg"
+            android:src="@drawable/back_arrow_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="Add Event"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="23sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/gray_border_bg"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:hint="Enter Title"
+            android:inputType="text"
+            android:padding="16dp"
+            android:singleLine="true"
+            android:textColor="@color/gray_500"
+            android:textColorHint="@color/gray_700"
+            android:textSize="14sp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/gray_border_bg"
+            android:ems="10"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:gravity="top"
+            android:hint="Enter Event Content"
+            android:inputType="textMultiLine"
+            android:lines="5"
+            android:padding="12dp"
+            android:singleLine="false"
+            android:textColor="@color/gray_500"
+            android:textColorHint="@color/gray_700"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/gray_border_bg"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                android:src="@drawable/calendar_icon" />
+
+            <View
+                android:layout_width="1.5dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@color/gray_500" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="Select Event Date"
+                android:textAlignment="textStart"
+                android:textColor="@color/gray_500"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/submitEventBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/voilet_bg_curve"
+            android:fontFamily="@font/poppins_medium"
+            android:padding="5dp"
+            android:text="Submit"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</LinearLayout>
