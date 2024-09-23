@@ -3,10 +3,10 @@ package com.sv.secureentry;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,14 +16,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.models.LoginReqBody;
 import com.sv.secureentry.models.LoginResBody;
 import com.sv.secureentry.models.ProjConstants;
 import com.sv.secureentry.models.SendOtpReqBody;
 import com.sv.secureentry.models.SendOtpResBody;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import java.util.Objects;
 
@@ -36,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etLoginEmail, etLoginPassword;
     private ApiInterface apiInterface;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,20 +50,14 @@ public class LoginActivity extends AppCompatActivity {
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+        mDialog = new ProgressDialog(this);
 
         loginBackBtn.setOnClickListener(v -> onBackPressed());
 
         navigateToForgetPassword.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, ForgetPasswordActivity.class)));
 
         loginBtn.setOnClickListener(v -> {
-            mDialog.show();
+            LoaderAdapter.startLoader(mDialog);
             String email = etLoginEmail.getText().toString();
             String password = etLoginPassword.getText().toString();
 
@@ -82,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (!loginResBody.getData().isActive) {
                                 sendOtp(loginResBody.getData().getEmail());
                             } else {
-                                mDialog.cancel();
+                                mDialog.dismiss();
                                 SharedPreferences sharedPreferences = getSharedPreferences(ProjConstants.USER_DATA_SF, Context.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -113,20 +105,20 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             }
                         } else {
-                            mDialog.cancel();
+                            mDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<LoginResBody> call, @NonNull Throwable t) {
-                        mDialog.cancel();
+                        mDialog.dismiss();
                         Toast.makeText(LoginActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
 
             } else {
-                mDialog.cancel();
+                mDialog.dismiss();
             }
         });
     }
@@ -155,20 +147,20 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<SendOtpResBody> call, @NonNull Response<SendOtpResBody> response) {
                 if (response.isSuccessful()) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(LoginActivity.this, "OTP sent successfully", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(LoginActivity.this, VerifyOtpActivity.class);
                     intent.putExtra(ProjConstants.USER_EMAIL, email);
                     startActivity(intent);
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(LoginActivity.this, "OTP send failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<SendOtpResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(LoginActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });

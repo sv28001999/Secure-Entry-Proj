@@ -30,9 +30,9 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
+//import com.leo.simplearcloader.ArcConfiguration;
+//import com.leo.simplearcloader.SimpleArcDialog;
+//import com.leo.simplearcloader.SimpleArcLoader;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Objects;
@@ -51,7 +51,7 @@ public class AddEntriesActivity extends AppCompatActivity {
     private ImageView imageView;
     private StorageReference storageReference;
     private ApiInterface apiInterface;
-    private SimpleArcDialog mDialog;
+//    private SimpleArcDialog mDialog;
     private EditText personName, personMobile, personPlace, personWork, memberRoomNo;
 
     @Override
@@ -69,13 +69,13 @@ public class AddEntriesActivity extends AppCompatActivity {
         personWork = findViewById(R.id.etPersonWork);
         memberRoomNo = findViewById(R.id.etPersonVisitingInfo);
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+//        mDialog = new SimpleArcDialog(this);
+//        ArcConfiguration configuration = new ArcConfiguration(this);
+//        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
+//        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
+//        configuration.setText("Please wait..");
+//        mDialog.setConfiguration(configuration);
+//        mDialog.setCancelable(false);
 
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);

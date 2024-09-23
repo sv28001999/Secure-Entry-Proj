@@ -1,8 +1,8 @@
 package com.sv.secureentry.bottomnavfragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -18,14 +18,12 @@ import android.widget.Toast;
 import com.sv.secureentry.ApiInterface;
 import com.sv.secureentry.R;
 import com.sv.secureentry.RetrofitClient;
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.adapters.VisitorAdapter;
 import com.sv.secureentry.adapters.VisitorList;
 import com.sv.secureentry.models.GetEntriesReqBody;
 import com.sv.secureentry.models.GetEntriesResBody;
 import com.sv.secureentry.models.ProjConstants;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +52,7 @@ public class EntryRecordFragment extends Fragment {
     private RecyclerView gateEntryRecyclerView;
     private VisitorAdapter visitorAdapter;
     private List<VisitorList> visitorList;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
 
     public EntryRecordFragment() {
         // Required empty public constructor
@@ -95,13 +93,7 @@ public class EntryRecordFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_entry_record, container, false);
         gateEntryRecyclerView = view.findViewById(R.id.gateEntryRecyclerView);
 
-        mDialog = new SimpleArcDialog(getContext());
-        ArcConfiguration configuration = new ArcConfiguration(requireContext());
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+        mDialog = new ProgressDialog(getContext());
 
         gateEntryRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -114,7 +106,7 @@ public class EntryRecordFragment extends Fragment {
     }
 
     private void getVisitorsFromApi() {
-        mDialog.show();
+        LoaderAdapter.startLoader(mDialog);
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences(ProjConstants.USER_DATA_SF, Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("token", "");
         String secretCode = sharedPreferences.getString("orgUniqueCode", "");
@@ -131,16 +123,16 @@ public class EntryRecordFragment extends Fragment {
                     visitorList = getVisitors(resBody.getData());
                     visitorAdapter = new VisitorAdapter(getContext(), visitorList);
                     gateEntryRecyclerView.setAdapter(visitorAdapter);
-                    mDialog.cancel();
+                    mDialog.dismiss();
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(getContext(), "Unsuccessful", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<GetEntriesResBody> call, Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
             }
         });

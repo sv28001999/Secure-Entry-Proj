@@ -3,20 +3,18 @@ package com.sv.secureentry;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.models.ProjConstants;
 import com.sv.secureentry.models.SendOtpReqBody;
 import com.sv.secureentry.models.SendOtpResBody;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,7 +26,7 @@ public class ForgetPasswordActivity extends AppCompatActivity {
     private Button sendForgetPasswordOtp;
     private EditText etForgotPassEmail;
     private ApiInterface apiInterface;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,20 +39,15 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+        mDialog = new ProgressDialog(this);
 
         sendForgetPasswordOtp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDialog.show();
+                LoaderAdapter.startLoader(mDialog);
+
                 if (!checkValidation(etForgotPassEmail.getText().toString())) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     return;
                 }
 
@@ -70,21 +63,21 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<SendOtpResBody> call, @NonNull Response<SendOtpResBody> response) {
                 if (response.isSuccessful()) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(ForgetPasswordActivity.this, "OTP sent successfully", Toast.LENGTH_SHORT).show();
                     ProjConstants.isForgetPasswordNav = true;
                     Intent intent = new Intent(ForgetPasswordActivity.this, VerifyOtpActivity.class);
                     intent.putExtra("userEmail", email);
                     startActivity(intent);
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(ForgetPasswordActivity.this, "OTP send failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<SendOtpResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(ForgetPasswordActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });

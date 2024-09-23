@@ -3,8 +3,8 @@ package com.sv.secureentry;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,14 +16,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.models.ProjConstants;
 import com.sv.secureentry.models.SendOtpReqBody;
 import com.sv.secureentry.models.SendOtpResBody;
 import com.sv.secureentry.models.VerifyOtpReqBody;
 import com.sv.secureentry.models.VerifyOtpResBody;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import java.util.Objects;
 
@@ -41,7 +39,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
     private ApiInterface apiInterface;
     private int currentField = 0;
     private String email;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,13 +57,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
                 findViewById(R.id.etOtpDigit4)
         };
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+        mDialog = new ProgressDialog(this);
 
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);
@@ -73,7 +65,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
         email = getIntent().getStringExtra(ProjConstants.USER_EMAIL);
 
         verifyOtpBtn.setOnClickListener(v -> {
-            mDialog.show();
+            LoaderAdapter.startLoader(mDialog);
             verifyOtpAndNav(ProjConstants.isForgetPasswordNav);
         });
         setEditTextListeners();
@@ -81,7 +73,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
         emailVerificationBackBtn.setOnClickListener(v -> onBackPressed());
 
         tvResendOtp.setOnClickListener(v -> {
-            mDialog.show();
+            LoaderAdapter.startLoader(mDialog);
             reSendOtp(email);
         });
     }
@@ -102,7 +94,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
                     VerifyOtpResBody verifyOtpResBody = response.body();
                     Log.d("responseCode", response.code() + " code");
                     if (response.isSuccessful()) {
-                        mDialog.cancel();
+                        mDialog.dismiss();
                         Log.d("isFailed", "false");
                         Toast.makeText(VerifyOtpActivity.this, "Verification Successful", Toast.LENGTH_SHORT).show();
                         if (isForgetPassword) {
@@ -124,7 +116,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
                             }
                         }
                     } else {
-                        mDialog.cancel();
+                        mDialog.dismiss();
                         Log.d("isFailed", "true");
                         Log.d("otpVerify", response.code() + " code");
                         Toast.makeText(VerifyOtpActivity.this, "Verification Failed", Toast.LENGTH_SHORT).show();
@@ -133,12 +125,12 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(@NonNull Call<VerifyOtpResBody> call, @NonNull Throwable t) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(VerifyOtpActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            mDialog.cancel();
+            mDialog.dismiss();
         }
     }
 
@@ -149,17 +141,17 @@ public class VerifyOtpActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<SendOtpResBody> call, @NonNull Response<SendOtpResBody> response) {
                 if (response.isSuccessful()) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(VerifyOtpActivity.this, "OTP sent successfully", Toast.LENGTH_SHORT).show();
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(VerifyOtpActivity.this, "OTP send failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<SendOtpResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(VerifyOtpActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });

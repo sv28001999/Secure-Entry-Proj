@@ -2,21 +2,20 @@ package com.sv.secureentry;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.content.Loader;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.models.ProjConstants;
 import com.sv.secureentry.models.UpdatePassReqBody;
 import com.sv.secureentry.models.UpdatePassResBody;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import java.util.Objects;
 
@@ -31,7 +30,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private Button updatePasswordBtn;
     private String email;
     private ApiInterface apiInterface;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +41,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         confirmPassword = findViewById(R.id.etUpdateConfirmPassword);
         updatePasswordBtn = findViewById(R.id.updatePasswordBtn);
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+        mDialog = new ProgressDialog(this);
 
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);
@@ -56,11 +49,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
         email = getIntent().getStringExtra(ProjConstants.USER_EMAIL);
 
         updatePasswordBtn.setOnClickListener(v -> {
-            mDialog.show();
+            LoaderAdapter.startLoader(mDialog);
             String password = newPassword.getText().toString();
             String cPassword = confirmPassword.getText().toString();
             if (!checkValidation(password, cPassword)) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 return;
             }
             updatePassword(email, password);
@@ -76,7 +69,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<UpdatePassResBody> call, @NonNull Response<UpdatePassResBody> response) {
                 UpdatePassResBody updatePassResBody = response.body();
                 if (response.isSuccessful() && Objects.requireNonNull(updatePassResBody).isSuccess) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(ChangePasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT).show();
                     if (Objects.equals(getIntent().getStringExtra(ProjConstants.CLIENT_ROLE), ProjConstants.MEMBER_ROLE)) {
                         startActivity(new Intent(ChangePasswordActivity.this, MemberHomeActivity.class));
@@ -90,14 +83,14 @@ public class ChangePasswordActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(ChangePasswordActivity.this, "Password update failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<UpdatePassResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(ChangePasswordActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });

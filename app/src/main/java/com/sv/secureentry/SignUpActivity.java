@@ -3,6 +3,7 @@ package com.sv.secureentry;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.models.GetSocietyInfoReqBody;
 import com.sv.secureentry.models.GetSocietyInfoResBody;
 import com.sv.secureentry.models.ProjConstants;
@@ -20,9 +22,6 @@ import com.sv.secureentry.models.RegistrationReqBody;
 import com.sv.secureentry.models.RegistrationResBody;
 import com.sv.secureentry.models.SendOtpReqBody;
 import com.sv.secureentry.models.SendOtpResBody;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import java.util.Objects;
 
@@ -36,7 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
     private String role;
     private EditText etFullName, etMobileNumber, etEmail, etSocietySecretCode, etUsername, etPassword, etConfirmPassword;
     private ApiInterface apiInterface;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
     private String fullName, mobileNumber, email, societySecretCode, username, password, confirmPassword;
 
     @Override
@@ -57,13 +56,8 @@ public class SignUpActivity extends AppCompatActivity {
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
+        mDialog = new ProgressDialog(this);
+
 
         Intent intent = getIntent();
         role = intent.getStringExtra(ProjConstants.CLIENT_ROLE);
@@ -97,9 +91,9 @@ public class SignUpActivity extends AppCompatActivity {
                 navigateWithDetailIntent.putExtra("password", password);
                 startActivity(navigateWithDetailIntent);
             } else {
-                mDialog.show();
+                LoaderAdapter.startLoader(mDialog);
                 if (checkValidation(fullName, mobileNumber, email, username, societySecretCode, password, confirmPassword)) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Log.d("isValidation", "called");
                     return;
                 }
@@ -121,20 +115,15 @@ public class SignUpActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.code() == 200) {
                     Toast.makeText(SignUpActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
                     sendOtp(email, role);
-//                    Intent intent = new Intent(SignUpActivity.this, VerifyOtpActivity.class);
-//                    intent.putExtra(ProjConstants.USER_EMAIL, email);
-//                    assert registrationResBody != null;
-//                    intent.putExtra(ProjConstants.CLIENT_ROLE, registrationResBody.getData().getRoleType());
-//                    startActivity(intent);
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(SignUpActivity.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<RegistrationResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(SignUpActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });
@@ -153,13 +142,13 @@ public class SignUpActivity extends AppCompatActivity {
                 } else {
                     etSocietySecretCode.setError("Invalid code");
                     Toast.makeText(SignUpActivity.this, "Invalid code found", Toast.LENGTH_SHORT).show();
-                    mDialog.cancel();
+                    mDialog.dismiss();
                 }
             }
 
             @Override
             public void onFailure(Call<GetSocietyInfoResBody> call, Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(SignUpActivity.this, "API failed", Toast.LENGTH_SHORT).show();
             }
         });
@@ -172,7 +161,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<SendOtpResBody> call, @NonNull Response<SendOtpResBody> response) {
                 if (response.isSuccessful()) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(SignUpActivity.this, "OTP sent successfully", Toast.LENGTH_SHORT).show();
                     Log.d("sign_up_role", role);
                     Intent intent = new Intent(SignUpActivity.this, VerifyOtpActivity.class);
@@ -181,14 +170,14 @@ public class SignUpActivity extends AppCompatActivity {
                     intent.putExtra(ProjConstants.CLIENT_ROLE, roleType);
                     startActivity(intent);
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(SignUpActivity.this, "OTP send failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<SendOtpResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(SignUpActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });
@@ -245,5 +234,11 @@ public class SignUpActivity extends AppCompatActivity {
     public void backToLoginPage(View view) {
         Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mDialog.dismiss();
     }
 }

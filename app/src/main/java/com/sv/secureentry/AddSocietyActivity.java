@@ -3,8 +3,8 @@ package com.sv.secureentry;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -12,14 +12,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.sv.secureentry.adapters.LoaderAdapter;
 import com.sv.secureentry.models.ProjConstants;
 import com.sv.secureentry.models.RegistrationReqBody;
 import com.sv.secureentry.models.RegistrationResBody;
 import com.sv.secureentry.models.SendOtpReqBody;
 import com.sv.secureentry.models.SendOtpResBody;
-import com.leo.simplearcloader.ArcConfiguration;
-import com.leo.simplearcloader.SimpleArcDialog;
-import com.leo.simplearcloader.SimpleArcLoader;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,7 +29,7 @@ public class AddSocietyActivity extends AppCompatActivity {
     private EditText etSocietyName, etCity, etState, etStreet, etPinCode;
     private String fullName, mobileNumber, email, username, password;
     private ApiInterface apiInterface;
-    private SimpleArcDialog mDialog;
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +44,8 @@ public class AddSocietyActivity extends AppCompatActivity {
         etState = findViewById(R.id.etState);
         etPinCode = findViewById(R.id.etPinCode);
 
+        mDialog = new ProgressDialog(this);
+
         fullName = getIntent().getStringExtra("fullName");
         mobileNumber = getIntent().getStringExtra("mobileNumber");
         email = getIntent().getStringExtra("email");
@@ -55,19 +55,11 @@ public class AddSocietyActivity extends AppCompatActivity {
         Retrofit retrofit = RetrofitClient.getInstance();
         apiInterface = retrofit.create(ApiInterface.class);
 
-        mDialog = new SimpleArcDialog(this);
-        ArcConfiguration configuration = new ArcConfiguration(this);
-        configuration.setLoaderStyle(SimpleArcLoader.STYLE.SIMPLE_ARC);
-        configuration.setColors(new int[]{Color.parseColor("#D8533FD3")});
-        configuration.setText("Please wait..");
-        mDialog.setConfiguration(configuration);
-        mDialog.setCancelable(false);
-
         addSocietyBackBtn.setOnClickListener(v -> onBackPressed());
 
         submitSignUpBtn.setOnClickListener(v -> {
             Log.d("signUpBtn", "clicked");
-            mDialog.show();
+            LoaderAdapter.startLoader(mDialog);
             String societyName = etSocietyName.getText().toString();
             String city = etCity.getText().toString();
             String street = etStreet.getText().toString();
@@ -76,7 +68,7 @@ public class AddSocietyActivity extends AppCompatActivity {
 
             if (!checkValidity(societyName, city, street, state, pinCode)) {
                 Log.d("signUpBtn", "validation error");
-                mDialog.cancel();
+                mDialog.dismiss();
                 return;
             }
 
@@ -95,14 +87,14 @@ public class AddSocietyActivity extends AppCompatActivity {
                         sendOtp(email, registrationResBody.getData().roleType);
                     } else {
                         Log.d("signUpBtn", "unsuccessful registration");
-                        mDialog.cancel();
+                        mDialog.dismiss();
                         Toast.makeText(AddSocietyActivity.this, "Registration Failed", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<RegistrationResBody> call, @NonNull Throwable t) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Log.d("signUpBtn", "api issue");
                     Toast.makeText(AddSocietyActivity.this, "API Failure", Toast.LENGTH_SHORT).show();
                 }
@@ -144,7 +136,7 @@ public class AddSocietyActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<SendOtpResBody> call, @NonNull Response<SendOtpResBody> response) {
                 if (response.isSuccessful()) {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(AddSocietyActivity.this, "OTP sent successfully", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(AddSocietyActivity.this, VerifyOtpActivity.class);
                     intent.putExtra(ProjConstants.USER_EMAIL, email);
@@ -152,14 +144,14 @@ public class AddSocietyActivity extends AppCompatActivity {
                     intent.putExtra(ProjConstants.CLIENT_ROLE, roleType);
                     startActivity(intent);
                 } else {
-                    mDialog.cancel();
+                    mDialog.dismiss();
                     Toast.makeText(AddSocietyActivity.this, "OTP send failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<SendOtpResBody> call, @NonNull Throwable t) {
-                mDialog.cancel();
+                mDialog.dismiss();
                 Toast.makeText(AddSocietyActivity.this, "API Failed", Toast.LENGTH_SHORT).show();
             }
         });
